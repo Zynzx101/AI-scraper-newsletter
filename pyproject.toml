@@ -1,0 +1,10 @@
+[project]
+name = "ai-scraper-newsletter"
+version = "0.1.0"
+description = "AI scraper"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "beautifulsoup4>=4.14.2",
+    "requests>=2.32.5",
+]
