@@ -31,3 +31,4 @@ AI Automation System will deliver a scalable, intelligence-driven pipeline that 
 ## Contributions
 
 [Ryan](https://github.com/liyunze-coding)
+[Milad](https://github.com/Zynzx101)
