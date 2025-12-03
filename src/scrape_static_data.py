@@ -7,7 +7,23 @@ import uuid
 from datetime import datetime
 import logging
 
+
+
+#logger setup
+file_logger = logging.getLogger("url_events")
+file_logger.setLevel(logging.INFO)
+
+if not file_logger.handlers:
+    handler = logging.FileHandler("logs_url_event.log")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(url)s - %(levelname)s - %(status)s - %(duration)s"
+    )
+    handler.setFormatter(formatter)
+    file_logger.addHandler(handler)
+
+
 class ScrapeStaticData():
+
 
     def __init__(self, urls):
         self.urls = urls
@@ -24,12 +40,8 @@ class ScrapeStaticData():
         self.links = []
         self.tags = []
         self.raw_html_length = '' 
+        self.logger = file_logger
 
-        self.logging_config = logging.basicConfig(
-                                filename='logs_url_event.log',
-                                level=logging.DEBUG,
-                                format='%(asctime)s - %(url)s - %(levelname)s - %(status)s - %(duration)s'
-                              )
 
     def current_milli_time(self):
         return round(time.time() * 1000)
@@ -41,19 +53,19 @@ class ScrapeStaticData():
         
         time_in_milliseconds = self.current_milli_time()
 
-        failed_urls = []
+
         for retry in range(max_tries):
             try:
                 response = requests.get(url, allow_redirects=True, timeout=timeout, headers=self.user_agent)
 
                 if response.status_code == 200:
                     print(f'success {self.domain}')
-                    self.return_json_output()
-                    self.log_events(url,response.status_code, time_in_milliseconds)
+                    self.return_json_output(url)
+                    self.log_events(url,response.reason, time_in_milliseconds)
                     return BeautifulSoup(response.content, 'html.parser')
 
                 else:
-                    self.log_events(url,response.status_code, time_in_milliseconds)
+                    self.log_events(url,response.reason, time_in_milliseconds)
                     print('Failed to fetch page.' \
                         f'HTTP Status Code: {response.status_code}.' \
                         f'Domain: {self.domain}' \
@@ -67,7 +79,7 @@ class ScrapeStaticData():
                 print(f'Error during request: {e}')
                 return
         
-        print(f'failed urls {failed_urls}')
+
 
 
 
@@ -78,8 +90,6 @@ class ScrapeStaticData():
                                         timeout=5)
 
 
-
-
     def log_events(self, problem, url, time_in_milliseconds):
         duration_end = self.current_milli_time()
         run_time_ms =  duration_end - time_in_milliseconds
@@ -87,10 +97,10 @@ class ScrapeStaticData():
         log_info = {
             'url': url,
             'status': problem,
-            'duration': str(run_time_ms)+'ms',
+            'duration': f'{run_time_ms}ms',
         }
 
-        logging.info("Logged Info", extra=log_info)
+        self.logger.info("Logged Info", extra=log_info)
         
 
 
@@ -107,10 +117,10 @@ class ScrapeStaticData():
 
 
 
-    def return_json_output(self):
+    def return_json_output(self, url):
         json_schema = {
             'id': self.unique_hash,
-            'source_url': self.urls,
+            'source_url': url,
             'source_domain': self.domain,
             'scraped_at': self.date_now,
             'content_type': self.content_type,
@@ -147,6 +157,5 @@ class_instance = ScrapeStaticData(urls=[
     'https://betanews.com',
     'https://techspot.com',
     'https://neowin.net'
-
 ])
 class_instance.fetch_urls()
