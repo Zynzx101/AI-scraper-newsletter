@@ -6,7 +6,7 @@ import orjson
 import uuid
 from datetime import datetime
 import log_data
-
+import yaml
 
 class ScrapeStaticData():
 
@@ -28,17 +28,19 @@ class ScrapeStaticData():
         self.tags = []
         self.raw_html_length = '' 
 
+
+
     
-
-
-
     def current_milli_time(self):
         return round(time.time() * 1000)
+    
+    def set_site_attributes(self, url_given):
+        self.unique_hash = uuid.uuid4()
+        self.domain = urlparse(url_given).netloc
+        self.date_now = datetime.now().isoformat()
 
     def fetch_site(self, url, max_tries, timeout):
-        self.unique_hash = uuid.uuid4()
-        self.domain = urlparse(url).netloc
-        self.date_now = datetime.now().isoformat()
+        self.set_site_attributes(url)
         
         time_in_milliseconds = self.current_milli_time()
 
@@ -49,7 +51,7 @@ class ScrapeStaticData():
 
                 if response.status_code == 200:
                     print(f'success {self.domain}')
-                    self.return_json_output(url)
+                    self.scraper_json_output(url)
                     log_data.log_events(url,response.reason, time_in_milliseconds)
                     return BeautifulSoup(response.content, 'html.parser')
 
@@ -85,7 +87,8 @@ class ScrapeStaticData():
         #title
 
 
-    def return_json_output(self, url):
+    def scraper_json_output(self, url):
+         
         json_schema = {
             'id': self.unique_hash,
             'source_url': url,
@@ -103,26 +106,18 @@ class ScrapeStaticData():
             }
         }
 
-        return print(orjson.dumps(json_schema).decode())
+        with open('../logs/scraper_json_output.json', 'a') as scraper_output:
+            scraper_output.write(f"{orjson.dumps(json_schema).decode()}\n\n")
 
 
 
+def return_config_urls():
+    with open('urls.yaml', 'r') as config:
+        loaded_config = yaml.safe_load(config)
 
-class_instance = ScrapeStaticData(urls=[
-    'https://daringfireball.net',
-    'https://arstechnica.com',
-    'https://theregister.com',
-    'https://slashdot.org',
-    'https://lwn.net',
-    'https://hackernews.org',
-    'https://tomshardware.com',
-    'https://anandtech.com',
-    'https://phoronix.com',
-    'https://howtogeek.com',
-    'https://ghacks.net',
-    'https://osnews.com',
-    'https://betanews.com',
-    'https://techspot.com',
-    'https://neowin.net'
-])
+    return loaded_config['urls']
+
+
+
+class_instance = ScrapeStaticData(urls=return_config_urls())
 class_instance.fetch_urls()

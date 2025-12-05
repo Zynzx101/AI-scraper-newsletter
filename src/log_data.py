@@ -7,7 +7,7 @@ file_logger = logging.getLogger('url_events')
 file_logger.setLevel(logging.INFO)
 
 if not file_logger.handlers:
-    handler = logging.FileHandler('./logs/logs_url_event.log')
+    handler = logging.FileHandler('../logs/logs_url_event.log')
     formatter = logging.Formatter(
         '%(asctime)s - %(url)s - %(levelname)s - %(status)s - %(duration)s'
     )
