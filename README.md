@@ -11,22 +11,31 @@ AI Automation System will deliver a scalable, intelligence-driven pipeline that 
 1. Install [Python](https://python.org) and [uv](https://docs.astral.sh/uv/getting-started/installation/)
 2. Clone this repository
 
-    ```
+    ```bash
     git clone https://github.com/deakinSoftwareEngineeingClub/AI-scraper-newsletter
     ```
 
-3. Install project dependencies
+3. Create Virtual Environment and install project dependencies
 
-    ```
+    ```bash
+    uv venv
+    .venv/Scripts/Activate # Activate Virtual environment
+
     uv sync
     ```
 
 4. Run project
 
     ```bash
-    .venv/Scripts/Activate # Activate Virtual environment
     uv run main.py
     ```
+
+Note: 
+If you want to install dependencies, use
+
+```
+uv add PYTHON_LIB_HERE
+```
 
 ## Contributions
 
